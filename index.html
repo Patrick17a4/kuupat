@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คำนวณแคลอรี่และคาร์โบไฮเดรต</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>คำนวณแคลอรี่และคาร์โบไฮเดรต</h1>
+        
+        <!-- ส่วนกรอกข้อมูล -->
+        <div class="input-group">
+            <label for="weight">น้ำหนัก (กก.):</label>
+            <input type="number" id="weight">
+        </div>
+        <div class="input-group">
+            <label for="height">ส่วนสูง (ซม.):</label>
+            <input type="number" id="height">
+        </div>
+        <div class="input-group">
+            <label for="age">อายุ:</label>
+            <input type="number" id="age">
+        </div>
+        <div class="input-group">
+            <label for="gender">เพศ:</label>
+            <select id="gender">
+                <option value="male">ชาย</option>
+                <option value="female">หญิง</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="activity">ระดับการออกกำลังกาย:</label>
+            <select id="activity">
+                <option value="1.2">ไม่ออกกำลังกาย</option>
+                <option value="1.375">1-3 ครั้ง/สัปดาห์</option>
+                <option value="1.55">3-5 ครั้ง/สัปดาห์</option>
+                <option value="1.725">6-7 ครั้ง/สัปดาห์</option>
+                <option value="1.9">ออกกำลังกายทุกวัน</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="goal">น้ำหนักเป้าหมาย (กก.):</label>
+            <input type="number" id="goal">
+        </div>
+        <button onclick="calculate()">คำนวณ</button>
+
+        <h3>คำนวณแคลอรี่และคาร์โบไฮเดรตที่ควรได้รับ:</h3>
+        <p id="result"></p>
+        
+        <h3>บันทึกเมนูอาหาร</h3>
+        <div id="food-menu"></div>
+
+        <button onclick="generateSummary()">สรุปการกินของวันนั้น</button>
+
+        <div>
+            <canvas id="calorieChart"></canvas>
+            <canvas id="carbChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let totalCalories = 0;
+        let totalCarbs = 0;
+
+        // คำนวณค่า TDEE และแคลอรี่ที่ควรได้รับ
+        function calculate() {
+            let weight = parseFloat(document.getElementById("weight").value);
+            let height = parseFloat(document.getElementById("height").value);
+            let age = parseFloat(document.getElementById("age").value);
+            let gender = document.getElementById("gender").value;
+            let activity = parseFloat(document.getElementById("activity").value);
+            let goal = parseFloat(document.getElementById("goal").value);
+            
+            let bmr = (gender === "male") ?
+                88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age) :
+                447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+
+            let tdee = bmr * activity;
+
+            let caloriesToConsume = tdee - 500; // ลดแคลอรี่สำหรับการลดน้ำหนัก
+            let carbsToConsume = caloriesToConsume * 0.45 / 4; // คำนวณคาร์โบไฮเดรตจากแคลอรี่
+
+            // แสดงผล
+            document.getElementById("result").innerText = 
+                แคลอรี่ที่ควรได้รับ: ${caloriesToConsume.toFixed(0)} กิโลแคลอรี่, คาร์โบไฮเดรตที่ควรได้รับ: ${carbsToConsume.toFixed(0)} กรัม;
+
+            // สร้างกราฟ
+            createCharts(caloriesToConsume, carbsToConsume);
+        }
+
+        // สร้างกราฟแสดงแคลอรี่และคาร์โบไฮเดรต
+        function createCharts(calories, carbs) {
+            let ctxCalorie = document.getElementById('calorieChart').getContext('2d');
+            let ctxCarb = document.getElementById('carbChart').getContext('2d');
+
+            new Chart(ctxCalorie, {
+                type: 'pie',
+                data: {
+                    labels: ['แคลอรี่ที่ได้รับ', 'แคลอรี่ที่เหลือ'],
+                    datasets: [{
+                        data: [calories, 2000 - calories],
+                        backgroundColor: ['#FF6347', '#A9A9A9'],
+                    }]
+                }
+            });
+
+            new Chart(ctxCarb, {
+                type: 'pie',
+                data: {
+                    labels: ['คาร์โบไฮเดรตที่ได้รับ', 'คาร์โบไฮเดรตที่เหลือ'],
+                    datasets: [{
+                        data: [carbs, 200 - carbs],
+                        backgroundColor: ['#8B4513', '#A9A9A9'],
+                    }]
+                }
+            });
+        }
+
+        // สรุปผลการกิน
+        function generateSummary() {
+            alert("การสรุป: แคลอรี่และคาร์โบไฮเดรตที่ได้รับในวันนี้ถูกคำนวณแล้ว");
+        }
+    </script>
+
+</body>
+</html>
